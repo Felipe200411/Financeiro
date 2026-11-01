@@ -1,0 +1,23 @@
+TOP CELL — SITE EM HTML, CSS E JAVASCRIPT
+
+COMO ABRIR
+Extraia o ZIP inteiro e abra top-cell/index.html no navegador.
+Mantenha as páginas, styles.css, script.js e assets na mesma estrutura.
+Para publicar, envie o conteúdo da pasta top-cell para uma hospedagem estática com HTTPS.
+
+CONTEÚDO
+Início, serviços, catálogo de peças, desbloqueio, contato e tela de acesso.
+Os cartões de tela, bateria e conector abrem a seção correspondente do catálogo.
+O WhatsApp exige internet. A imagem de fundo é incluída e funciona offline.
+
+CONTAS
+Este pacote é estático. Não cria nem armazena contas ou senhas localmente.
+A tela de acesso direciona para o site online existente, onde o serviço de contas é mantido.
+Para um login independente na nova hospedagem, será necessário conectar um serviço de autenticação e autorizar o novo endereço.
+
+PREÇOS E DADOS
+Os dados foram preservados do site atual. Os preços detalhados do catálogo são exemplos anteriores e devem ser confirmados pela loja.
+WhatsApp: (99) 98480-5415. Endereço: Rua 03, casa 16 — Vila Jurandir Lago.
+Horário: Seg a Sex 9h–18h. Garantia informada: 90 dias.
+
+Sem React, ferramentas de compilação, dependências ou instalação.
