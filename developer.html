@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Área de Desenvolvedor — TOP CELL</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+  <script src="developer.js" defer></script>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a class="brand" href="index.html"><span>▯</span> TOP CELL</a>
+      <nav aria-label="Navegação principal">
+        <a href="index.html">Ver site</a>
+        <a href="developer.html" aria-current="page">Desenvolvedor</a>
+      </nav>
+    </div>
+  </header>
+  <main class="developer-shell">
+    <section class="developer-login" id="developer-login">
+      <div class="card developer-login-card">
+        <h1>Acesso de desenvolvedor</h1>
+        <p>Informe o e-mail e a senha autorizados para abrir a área de edição.</p>
+        <form id="developer-login-form">
+          <label for="developer-email">E-mail</label>
+          <input id="developer-email" name="email" type="email" autocomplete="email" required>
+          <label for="developer-password">Senha</label>
+          <input id="developer-password" name="password" type="password" autocomplete="current-password" required>
+          <p class="developer-status" id="developer-login-status" role="status" aria-live="polite"></p>
+          <button class="button primary" type="submit">Entrar na área de desenvolvedor</button>
+        </form>
+      </div>
+    </section>
+    <div id="developer-content" hidden>
+    <div class="developer-toolbar">
+      <h1>Área de desenvolvedor</h1>
+      <div class="developer-actions">
+        <button class="button" id="logout-developer" type="button">Sair</button>
+        <button class="button" id="reset-config" type="button">Restaurar padrão</button>
+        <button class="button primary" id="save-config" type="button">Salvar alterações</button>
+      </div>
+    </div>
+    <div class="developer-workspace">
+      <aside class="developer-panel">
+        <h2>Conteúdo e aparência</h2>
+        <form id="developer-form">
+          <div class="field-row"><label for="brand">Nome da empresa</label><input id="brand" name="brand"></div>
+          <div class="field-row"><label for="heroTitle">Título principal</label><input id="heroTitle" name="heroTitle"></div>
+          <div class="field-row"><label for="heroAccent">Parte em destaque</label><input id="heroAccent" name="heroAccent"></div>
+          <div class="field-row"><label for="heroDescription">Descrição</label><input id="heroDescription" name="heroDescription"></div>
+          <div class="field-row"><label for="whatsapp">WhatsApp com código do país</label><input id="whatsapp" name="whatsapp" inputmode="numeric"></div>
+          <div class="field-row"><label for="primary">Cor principal</label><input id="primary" name="primary" type="color"></div>
+          <div class="field-row"><label for="background">Cor de fundo</label><input id="background" name="background" type="color"></div>
+          <div class="field-row"><label for="card">Cor dos cartões</label><input id="card" name="card" type="color"></div>
+        </form>
+        <p class="developer-status" id="developer-status" role="status" aria-live="polite"></p>
+      </aside>
+      <section class="developer-preview" aria-label="Prévia ao vivo do site">
+        <iframe id="site-preview" title="Prévia do site" src="index.html"></iframe>
+      </section>
+    </div>
+    </div>
+  </main>
+  <footer>© <span id="year">2026</span> TOP CELL</footer>
+</body>
+</html>
