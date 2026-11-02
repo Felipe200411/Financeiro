@@ -1,1 +1,68 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="google-signin-client_id" content="328336285138-qj5baicoq2oqnakr0icn34pb9oosinph.apps.googleusercontent.com"><title>Entrar ou criar conta — TOP CELL</title><meta name="description" content="Acesse sua conta TOP CELL com e-mail."><meta property="og:title" content="Entrar ou criar conta — TOP CELL"><meta property="og:description" content="Acesse sua conta TOP CELL com e-mail."><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="styles.css"><script src="https://accounts.google.com/gsi/client" async defer></script><script src="script.js" defer></script></head><body><header><div class="header-inner"><a class="brand" href="index.html"><span>▯</span> TOP CELL</a><nav aria-label="Navegação principal"><a href="index.html">Início</a><a href="servicos.html">Serviços</a><a href="desbloqueio.html">Desbloqueio</a><a href="contato.html">Contato</a><a class="button primary" href="auth.html">Entrar</a></nav></div></header><main><section class="container auth"><div class="card"><h1 id="auth-title">Entrar</h1><form id="auth-form"><div id="signup-fields" hidden><label for="name">Nome</label><input id="name" name="name" autocomplete="name" minlength="2" maxlength="100"><label for="phone">Telefone / WhatsApp</label><input id="phone" name="phone" type="tel" autocomplete="tel" minlength="8" maxlength="30"></div><label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="email" required maxlength="255"><label for="password">Senha</label><input id="password" name="password" type="password" autocomplete="current-password" required minlength="6" maxlength="72"><p class="message" id="auth-message" role="status" aria-live="polite"></p><button class="button primary" type="submit" id="auth-submit">Entrar</button></form><button class="switch" id="auth-switch" type="button">Não tem conta? Criar conta</button><div class="google-divider"><span>ou</span></div><div id="google-signin-button"></div><p class="message" id="google-auth-message" role="status" aria-live="polite"></p></div></section></main><footer>© <span id="year">2026</span> TOP CELL Assistência Técnica</footer></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="google-signin-client_id" content="328336285138-qj5baicoq2oqnakr0icn34pb9oosinph.apps.googleusercontent.com">
+  <title>Entrar ou criar conta — TOP CELL</title>
+  <meta name="description" content="Acesse sua conta TOP CELL com e-mail.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a class="brand" href="index.html"><span>▯</span> TOP CELL</a>
+      <nav aria-label="Navegação principal">
+        <a href="index.html">Início</a>
+        <a href="servicos.html">Serviços</a>
+        <a href="desbloqueio.html">Desbloqueio</a>
+        <a href="contato.html">Contato</a>
+        <a class="button primary" href="auth.html">Entrar</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="container auth">
+      <div class="card">
+        <h1 id="auth-title">Entrar</h1>
+        <form id="auth-form">
+          <div id="signup-fields" hidden>
+            <label for="name">Nome</label>
+            <input id="name" name="name" autocomplete="name" minlength="2" maxlength="100">
+            <label for="phone">Telefone / WhatsApp</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" minlength="8" maxlength="30">
+          </div>
+          <label for="email">E-mail</label>
+          <input id="email" name="username" type="email" autocomplete="username" required maxlength="255">
+          <label for="password">Senha</label>
+          <div class="password-field">
+            <input id="password" name="password" type="password" autocomplete="current-password" required minlength="6" maxlength="72">
+            <button class="password-toggle" type="button" data-password-toggle="password" aria-controls="password" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button>
+          </div>
+          <label class="remember-option" for="remember-login">
+            <input id="remember-login" name="remember" type="checkbox">
+            <span>Mantenha-me conectado</span>
+          </label>
+          <p class="message" id="auth-message" role="status" aria-live="polite"></p>
+          <button class="button primary" type="submit" id="auth-submit">Entrar</button>
+        </form>
+        <button class="switch" id="auth-switch" type="button">Não tem conta? Criar conta</button>
+        <div class="google-divider"><span>ou</span></div>
+        <div id="google-signin-button"></div>
+        <p class="message" id="google-auth-message" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+  </main>
+  <dialog id="save-login-dialog" class="save-login-dialog" aria-labelledby="save-login-title">
+    <h2 id="save-login-title">Salvar email e senha?</h2>
+    <p>Você poderá preencher estes dados automaticamente na próxima vez.</p>
+    <div class="save-login-actions">
+      <button class="button" id="save-login-no" type="button">Não</button>
+      <button class="button primary" id="save-login-yes" type="button">Sim</button>
+    </div>
+  </dialog>
+  <footer>© <span id="year">2026</span> TOP CELL Assistência Técnica</footer>
+</body>
+</html>
