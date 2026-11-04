@@ -1,14 +1,12 @@
-TOP CELL
+MEU DINHEIRO
 
-## Executar com proteção do servidor
+Painel financeiro pessoal, feito para acompanhar salário, despesas mensais e
+compras realizadas no cartão.
 
-1. Instale Node.js 18 ou superior.
-2. Crie as variáveis de ambiente usando `.env.example` como referência.
-3. Execute `npm start`.
-4. Acesse `http://localhost:3000`.
+## Como usar
 
-Nunca envie `.env` para o GitHub e use uma senha forte no ambiente de produção. Gere o hash com:
+Abra `index.html` diretamente no navegador ou publique os arquivos em um servidor
+estático privado.
 
-```text
-node -e "const c=require('crypto');const s=c.randomBytes(16).toString('hex');const h=c.scryptSync('SUA_SENHA_FORTE',s,64).toString('hex');console.log(s+':'+h)"
-```
+Os dados são armazenados apenas no armazenamento local do navegador deste
+dispositivo. Não há envio de informações para servidores.

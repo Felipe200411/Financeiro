@@ -1,2 +1,427 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Assistência Técnica de Celulares — TOP CELL</title><meta name="description" content="Conserto de celulares com rapidez e garantia: tela, bateria, conector e mais."><meta property="og:title" content="Assistência Técnica de Celulares — TOP CELL"><meta property="og:description" content="Conserto de celulares com rapidez e garantia: tela, bateria, conector e mais."><meta property="og:type" content="website"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="styles.css"><script src="script.js" defer></script></head><body><header><div class="header-inner"><a class="brand" href="index.html"><span>▯</span> <span data-site-config="brand">TOP CELL</span></a><nav aria-label="Navegação principal"><a href="index.html" aria-current="page">Início</a><a href="servicos.html">Serviços</a><a href="desbloqueio.html">Desbloqueio</a><a href="contato.html">Contato</a><a class="button primary" href="auth.html">Entrar</a> </nav></div></header><main><section class="container intro"><h1><span data-site-config="heroTitle">Seu celular</span> <span class="accent" data-site-config="heroAccent">novo de novo</span></h1><p data-site-config="heroDescription">Assistência técnica rápida, com peças de qualidade e 90 dias de garantia.</p><div class="actions"><a class="button primary" data-whatsapp-link href="https://wa.me/5599984805415" target="_blank" rel="noopener noreferrer">Orçamento no WhatsApp</a><a class="button" href="servicos.html">Ver serviços</a></div></section><section class="container"><h2>O que consertamos</h2><div class="grid"><a class="card service" href="catalogo.html#tela"><span class="icon" aria-hidden="true">▯</span><h3>Troca de tela</h3><p>Telas originais e de alta qualidade, troca no mesmo dia.</p><p class="price">Ver catálogo →</p></a><a class="card service" href="catalogo.html#bateria"><span class="icon" aria-hidden="true">▰</span><h3>Bateria</h3><p>Seu celular durando o dia todo novamente.</p><p class="price">Ver catálogo →</p></a><a class="card service" href="catalogo.html#conector"><span class="icon" aria-hidden="true">⚡</span><h3>Conector de carga</h3><p>Celular não carrega? Resolvemos rápido.</p><p class="price">Ver catálogo →</p></a><div class="card"><span class="icon" aria-hidden="true">◉</span><h3>Dano por água</h3><p>Limpeza e recuperação de aparelhos molhados.</p></div><div class="card"><span class="icon" aria-hidden="true">⚙</span><h3>Placa e software</h3><p>Diagnóstico avançado, desbloqueio e atualização.</p></div><div class="card"><span class="icon" aria-hidden="true">◇</span><h3>Películas e capas</h3><p>Proteção completa para o seu aparelho.</p></div></div></section></main>
-<footer>© <span id="year">2026</span> <span data-site-config="brand">TOP CELL</span> Assistência Técnica</footer></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b0f14">
+  <title>Meu Dinheiro - Controle Financeiro</title>
+  <meta name="description" content="Organizador financeiro pessoal para salário, gastos e fatura do cartão.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="logo" href="index.html" aria-label="Meu Dinheiro">
+      <span class="logo-mark">M</span>
+      <span>Meu Dinheiro</span>
+    </a>
+    <nav class="side-nav" aria-label="Navegação principal">
+      <button class="nav-item active" type="button" data-view="dashboard">
+        <span class="nav-icon">⌂</span> Visão geral
+      </button>
+      <button class="nav-item" type="button" data-view="transactions">
+        <span class="nav-icon">↔</span> Movimentações
+      </button>
+      <button class="nav-item" type="button" data-view="card">
+        <span class="nav-icon">▭</span> Cartão
+      </button>
+      <button class="nav-item" type="button" data-view="bills">
+        <span class="nav-icon">R$</span> A pagar
+      </button>
+      <button class="nav-item" type="button" data-view="expenses">
+        <span class="nav-icon">↓</span> Gastos
+      </button>
+    </nav>
+    <div class="private-note">
+      <span>●</span>
+      Dados privados neste dispositivo
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <button class="menu-button" id="menu-button" type="button" aria-label="Abrir menu">☰</button>
+      <div>
+        <p class="eyebrow">Minha carteira</p>
+        <h1>Olá, bem-vindo de volta</h1>
+      </div>
+      <div class="top-actions">
+        <label class="month-picker" for="month-select">
+          <span>Mês</span>
+          <select id="month-select"></select>
+        </label>
+        <button class="button primary" id="add-button" type="button">+ Nova movimentação</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <section class="view active" data-view-panel="dashboard">
+        <div class="summary-grid">
+          <article class="summary-card balance">
+            <div class="summary-top">
+              <span>Saldo disponível</span>
+              <span class="summary-icon">R$</span>
+            </div>
+            <strong class="summary-value" id="available-balance">R$ 0,00</strong>
+            <p id="balance-caption">Após as movimentações do mês</p>
+          </article>
+          <article class="summary-card">
+            <div class="summary-top">
+              <span>Entradas</span>
+              <span class="trend positive">↑</span>
+            </div>
+            <strong class="summary-value" id="income-total">R$ 0,00</strong>
+            <p>Salário e outras receitas</p>
+          </article>
+          <article class="summary-card">
+            <div class="summary-top">
+              <span>Gastos</span>
+              <span class="trend negative">↓</span>
+            </div>
+            <strong class="summary-value" id="expense-total">R$ 0,00</strong>
+            <p id="expense-caption">Total do mês</p>
+          </article>
+          <article class="summary-card">
+            <div class="summary-top">
+              <span>Fatura do cartão</span>
+              <span class="trend">▭</span>
+            </div>
+            <strong class="summary-value" id="card-total">R$ 0,00</strong>
+            <p id="card-caption">No cartão neste mês</p>
+          </article>
+        </div>
+
+        <section class="panel weekly-overview">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Recebimentos semanais</p>
+              <h2>Salário recebido no mês</h2>
+            </div>
+            <strong class="weekly-month-total" id="weekly-month-total">R$ 0,00</strong>
+          </div>
+          <div class="weekly-overview-grid" id="weekly-overview-list"></div>
+        </section>
+
+        <div class="dashboard-grid">
+          <section class="panel spending-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Orçamento mensal</p>
+                <h2>Gastos por categoria</h2>
+              </div>
+              <span class="panel-total" id="category-total">0 categorias</span>
+            </div>
+            <div class="category-list" id="category-list"></div>
+          </section>
+
+          <section class="panel recent-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Atividade recente</p>
+                <h2>Últimas movimentações</h2>
+              </div>
+              <button class="text-button" type="button" data-view="transactions">Ver tudo</button>
+            </div>
+            <div id="recent-list" class="transaction-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" data-view-panel="transactions">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Histórico completo</p>
+            <h2>Movimentações</h2>
+          </div>
+          <input class="search-input" id="search-input" type="search" placeholder="Buscar movimentação">
+        </div>
+        <section class="panel table-panel">
+          <div class="transaction-table-head">
+            <span>Descrição</span><span>Categoria</span><span>Forma</span><span>Valor</span>
+          </div>
+          <div id="transactions-list" class="transaction-table"></div>
+        </section>
+      </section>
+
+      <section class="view" data-view-panel="card">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Controle mensal</p>
+            <h2>Meu cartão</h2>
+          </div>
+        </div>
+        <div class="card-grid">
+          <article class="credit-card-preview">
+            <div class="credit-card-top">
+              <span class="neon-brand">neon</span>
+              <span class="card-chip"></span>
+            </div>
+            <div class="credit-card-usage">
+              <strong id="card-limit-used">R$ 0,00</strong>
+              <span>utilizado</span>
+            </div>
+            <div class="credit-card-bottom">
+              <div>
+                <span>limite</span>
+                <strong id="card-limit-value">R$ 0,00</strong>
+              </div>
+              <span class="card-network">VISA</span>
+            </div>
+          </article>
+          <section class="panel limit-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Controle de limite</p>
+                <h2>Fatura atual</h2>
+              </div>
+              <button class="icon-button" id="edit-limit-button" type="button" title="Editar limite">✎</button>
+            </div>
+            <strong class="large-value" id="card-balance-large">R$ 0,00</strong>
+            <div class="progress-track"><span id="card-progress"></span></div>
+            <input class="limit-range" id="card-limit-range" type="range" min="0" max="280" step="0.01" value="0" aria-label="Valor utilizado do limite do cartão">
+            <div class="range-values"><span>R$ 0,00</span><strong id="limit-range-max">R$ 280,00</strong></div>
+            <div class="limit-meta">
+              <span><b id="card-used-percent">0%</b> utilizado</span>
+              <span><b id="card-available-limit">R$ 0,00</b> disponível</span>
+            </div>
+          </section>
+
+        </div>
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Gastos no cartão</p>
+              <h2>Lançamentos da fatura</h2>
+            </div>
+          </div>
+          <div id="card-list" class="transaction-list"></div>
+        </section>
+      </section>
+
+      <section class="view" data-view-panel="bills">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Contas e parcelas</p>
+            <h2>A pagar</h2>
+          </div>
+        </div>
+        <div class="bills-grid">
+          <button class="bill-card" type="button" data-bill="TikTok">
+            <span class="bill-logo tiktok-logo">♪</span>
+            <strong>TikTok</strong>
+            <span>Ver pagamentos</span>
+          </button>
+          <button class="bill-card" type="button" data-bill="Mercado Pago">
+            <span class="bill-logo brand-logo"><img src="assets/mercado-pago.png" alt="Mercado Pago"></span>
+            <strong>Mercado Pago</strong>
+            <span>Ver pagamentos</span>
+          </button>
+          <button class="bill-card" type="button" data-bill="Mercado Livre">
+            <span class="bill-logo brand-logo"><img src="assets/mercado-livre.png" alt="Mercado Livre"></span>
+            <strong>Mercado Livre</strong>
+            <span>Ver pagamentos</span>
+          </button>
+          <button class="bill-card" type="button" data-bill="Shopee">
+            <span class="bill-logo brand-logo"><img src="assets/shopee.png" alt="Shopee"></span>
+            <strong>Shopee</strong>
+            <span>Ver pagamentos</span>
+          </button>
+          <button class="bill-card" type="button" data-bill="Noroeste">
+            <span class="bill-logo brand-logo"><img src="assets/noroeste.png" alt="Lojas Noroeste"></span>
+            <strong>Noroeste</strong>
+            <span>Ver pagamentos</span>
+          </button>
+          <button class="bill-card" type="button" data-bill="Moto">
+            <span class="bill-logo moto-logo">🏍</span>
+            <strong>Moto</strong>
+            <span>Ver pagamentos</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="view" data-view-panel="expenses">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Categorias pessoais</p>
+            <h2>Gastos</h2>
+          </div>
+        </div>
+        <div class="expense-categories-grid">
+          <button class="expense-category-card" type="button" data-expense-category="Namorada"><span>♥</span><strong>Namorada</strong></button>
+          <button class="expense-category-card" type="button" data-expense-category="Moto"><span>◉</span><strong>Moto</strong></button>
+          <button class="expense-category-card" type="button" data-expense-category="Gasolina"><span>⛽</span><strong>Gasolina</strong></button>
+          <button class="expense-category-card" type="button" data-expense-category="Lazer"><span>♫</span><strong>Lazer</strong></button>
+          <button class="expense-category-card" type="button" data-expense-category="Comida"><span>🍴</span><strong>Comida</strong></button>
+        </div>
+        <section class="panel expense-manager" id="expense-manager">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Gerenciar gastos</p>
+              <h2 id="expense-inline-title">Selecione uma categoria</h2>
+            </div>
+          </div>
+          <form id="expense-form" class="expense-inline-form">
+            <div class="form-grid">
+              <label>Nome<input id="expense-name" maxlength="60" placeholder="Ex.: Oficina"></label>
+              <label>Data<input id="expense-date" type="date"></label>
+              <label>Valor (R$)<input id="expense-amount" type="number" min="0" step="0.01"></label>
+            </div>
+            <button class="button primary" type="submit" disabled id="expense-submit">Adicionar gasto</button>
+          </form>
+          <div class="expense-register-list" id="expense-register-list"></div>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <dialog class="modal" id="bill-modal">
+    <div class="bill-modal-content">
+      <div class="modal-heading">
+        <div>
+          <p class="eyebrow">A pagar</p>
+          <h2 id="bill-modal-title">Pagamentos</h2>
+        </div>
+        <button class="close-button" id="bill-modal-close" type="button" aria-label="Fechar">×</button>
+      </div>
+      <div id="bill-modal-body"></div>
+    </div>
+  </dialog>
+
+  <dialog class="modal" id="transaction-modal">
+    <form method="dialog" id="transaction-form">
+      <div class="modal-heading">
+        <div>
+          <p class="eyebrow">Novo lançamento</p>
+          <h2>Adicionar movimentação</h2>
+        </div>
+        <button class="close-button" value="cancel" type="submit" aria-label="Fechar">×</button>
+      </div>
+      <div class="type-switch" role="group" aria-label="Tipo de movimentação">
+        <button class="active" type="button" data-type="expense">Despesa</button>
+        <button type="button" data-type="income">Receita</button>
+      </div>
+      <label>Descrição<input name="description" required maxlength="60" placeholder="Ex.: Mercado"></label>
+      <div class="form-grid">
+        <label>Valor (R$)<input name="amount" type="number" min="0.01" step="0.01" placeholder="0,00"></label>
+        <label>Data<input name="date" type="date" required></label>
+      </div>
+      <div class="form-grid">
+        <label>Categoria
+          <select name="category">
+            <option>Alimentação</option><option>Moradia</option><option>Transporte</option>
+            <option>Saúde</option><option>Lazer</option><option>Compras</option>
+            <option>Educação</option><option>Salário</option><option>Outros</option>
+          </select>
+        </label>
+        <label>Forma de pagamento
+          <select name="method">
+            <option value="account">Conta corrente</option>
+            <option value="card">Cartão de crédito</option>
+            <option value="cash">Dinheiro</option>
+          </select>
+        </label>
+      </div>
+      <div class="income-status" id="income-status" hidden>
+        <div class="weekly-title">
+          <strong>Pagamentos do mês</strong>
+          <small>Cadastre os valores semanais e marque os que já recebeu</small>
+        </div>
+        <div class="weekly-payments">
+          <div class="weekly-payment">
+            <label class="check-option" for="week-received-1">
+              <input id="week-received-1" name="weekReceived1" type="checkbox">
+              <span><strong>1ª semana</strong></span>
+            </label>
+            <label class="check-option overdue-option" for="week-overdue-1">
+              <input id="week-overdue-1" name="weekOverdue1" type="checkbox">
+              <span><strong>Atrasado</strong></span>
+            </label>
+            <div class="weekly-fields" id="week-fields-1">
+              <label>Dia<select name="weekDay1"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
+              <label>Data<input name="weekDate1" type="date"></label>
+              <label>Valor<input name="weekAmount1" type="number" min="0" step="0.01"></label>
+            </div>
+            <div class="overdue-fields" id="overdue-fields-1" hidden>
+              <label>Dia atrasado<select name="weekOverdueDay1"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
+              <label>Data atrasada<input name="weekOverdueDate1" type="date"></label>
+              <label>Valor atrasado<input name="weekOverdueAmount1" type="number" min="0" step="0.01"></label>
+            </div>
+          </div>
+          <div class="weekly-payment">
+            <label class="check-option" for="week-received-2">
+              <input id="week-received-2" name="weekReceived2" type="checkbox">
+              <span><strong>2ª semana</strong></span>
+            </label>
+            <label class="check-option overdue-option" for="week-overdue-2">
+              <input id="week-overdue-2" name="weekOverdue2" type="checkbox">
+              <span><strong>Atrasado</strong></span>
+            </label>
+            <div class="weekly-fields" id="week-fields-2">
+              <label>Dia<select name="weekDay2"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
+              <label>Data<input name="weekDate2" type="date"></label>
+              <label>Valor<input name="weekAmount2" type="number" min="0" step="0.01"></label>
+            </div>
+            <div class="overdue-fields" id="overdue-fields-2" hidden>
+              <label>Dia atrasado<select name="weekOverdueDay2"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
+              <label>Data atrasada<input name="weekOverdueDate2" type="date"></label>
+              <label>Valor atrasado<input name="weekOverdueAmount2" type="number" min="0" step="0.01"></label>
+            </div>
+          </div>
+          <div class="weekly-payment">
+            <label class="check-option" for="week-received-3">
+              <input id="week-received-3" name="weekReceived3" type="checkbox">
+              <span><strong>3ª semana</strong></span>
+            </label>
+            <label class="check-option overdue-option" for="week-overdue-3">
+              <input id="week-overdue-3" name="weekOverdue3" type="checkbox">
+              <span><strong>Atrasado</strong></span>
+            </label>
+            <div class="weekly-fields" id="week-fields-3">
+              <label>Dia<select name="weekDay3"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
+              <label>Data<input name="weekDate3" type="date"></label>
+              <label>Valor<input name="weekAmount3" type="number" min="0" step="0.01"></label>
+            </div>
+            <div class="overdue-fields" id="overdue-fields-3" hidden>
+              <label>Dia atrasado<select name="weekOverdueDay3"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
+              <label>Data atrasada<input name="weekOverdueDate3" type="date"></label>
+              <label>Valor atrasado<input name="weekOverdueAmount3" type="number" min="0" step="0.01"></label>
+            </div>
+          </div>
+          <div class="weekly-payment">
+            <label class="check-option" for="week-received-4">
+              <input id="week-received-4" name="weekReceived4" type="checkbox">
+              <span><strong>4ª semana</strong></span>
+            </label>
+            <label class="check-option overdue-option" for="week-overdue-4">
+              <input id="week-overdue-4" name="weekOverdue4" type="checkbox">
+              <span><strong>Atrasado</strong></span>
+            </label>
+            <div class="weekly-fields" id="week-fields-4">
+              <label>Dia<select name="weekDay4"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
+              <label>Data<input name="weekDate4" type="date"></label>
+              <label>Valor<input name="weekAmount4" type="number" min="0" step="0.01"></label>
+            </div>
+            <div class="overdue-fields" id="overdue-fields-4" hidden>
+              <label>Dia atrasado<select name="weekOverdueDay4"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
+              <label>Data atrasada<input name="weekOverdueDate4" type="date"></label>
+              <label>Valor atrasado<input name="weekOverdueAmount4" type="number" min="0" step="0.01"></label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="button primary modal-submit" type="submit" id="transaction-submit">Adicionar movimentação</button>
+    </form>
+  </dialog>
+
+  <dialog class="modal small-modal" id="limit-modal">
+    <form method="dialog" id="limit-form">
+      <div class="modal-heading">
+        <div><p class="eyebrow">Configuração</p><h2>Limite do cartão</h2></div>
+        <button class="close-button" value="cancel" type="submit" aria-label="Fechar">×</button>
+      </div>
+      <label>Limite total (R$)<input id="limit-input" name="limit" type="number" required min="0" step="100"></label>
+      <button class="button primary modal-submit" type="submit">Salvar limite</button>
+    </form>
+  </dialog>
+</body>
+</html>
