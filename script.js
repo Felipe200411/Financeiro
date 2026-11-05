@@ -21,6 +21,11 @@ function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     const loaded = { ...fallback, ...saved };
+    loaded.transactions = (loaded.transactions || []).map(item => {
+      if (item.type !== "income" || item.category !== "Salário" || !item.week) return item;
+      const lateSupplement = / - \dª semana(?: atrasada| \(complemento\))$/.test(item.description);
+      return { ...item, overdue: lateSupplement };
+    });
     if (Number(saved.cardLimit) === 3000) loaded.cardLimit = 280;
     if (!saved.cardUsageConfirmed && !(loaded.transactions || []).some(item => item.type === "expense" && item.method === "card")) {
       loaded.cardUsed = 0;
@@ -61,6 +66,12 @@ function monthTransactions() {
   return state.transactions.filter(item => item.date.startsWith(currentMonth()));
 }
 
+function monthPersonalExpenses() {
+  return Object.entries(state.personalExpenses).flatMap(([category, items]) =>
+    items.filter(item => item.date.startsWith(currentMonth())).map(item => ({ ...item, category }))
+  );
+}
+
 function escapeHtml(value) {
   const node = document.createElement("span");
   node.textContent = String(value);
@@ -69,10 +80,12 @@ function escapeHtml(value) {
 
 function render() {
   const transactions = monthTransactions();
+  const personalExpenses = monthPersonalExpenses();
   const income = transactions
     .filter(item => item.type === "income" && (item.category !== "Salário" || item.received))
     .reduce((sum, item) => sum + item.amount, 0);
-  const expenses = transactions.filter(item => item.type === "expense").reduce((sum, item) => sum + item.amount, 0);
+  const expenses = transactions.filter(item => item.type === "expense").reduce((sum, item) => sum + item.amount, 0)
+    + personalExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   const cardTransactions = transactions.filter(item => item.type === "expense" && item.method === "card");
   const cardTotal = cardTransactions.reduce((sum, item) => sum + item.amount, 0);
 
@@ -80,10 +93,12 @@ function render() {
   document.getElementById("expense-total").textContent = formatMoney(expenses);
   document.getElementById("card-total").textContent = formatMoney(cardTotal);
   document.getElementById("available-balance").textContent = formatMoney(income - expenses);
-  document.getElementById("expense-caption").textContent = `${transactions.filter(item => item.type === "expense").length} movimentações no mês`;
+  const expenseCount = transactions.filter(item => item.type === "expense").length + personalExpenses.length;
+  document.getElementById("expense-caption").textContent =
+    expenseCount === 1 ? "1 movimentação no mês" : `${expenseCount} movimentações no mês`;
   document.getElementById("card-caption").textContent = `${cardTransactions.length} compras neste mês`;
 
-  renderCategories(transactions);
+  renderCategories(transactions, personalExpenses);
   renderRecent(transactions);
   renderTransactions(transactions);
   renderCard(cardTransactions, cardTotal);
@@ -99,15 +114,23 @@ function renderWeeklyOverview(transactions) {
       item.type === "income" && item.category === "Salário" && item.week === week
     );
     const receivedRecords = records.filter(item => item.received);
+    const regularRecords = records.filter(item => !item.overdue);
     const overdueRecords = records.filter(item => item.overdue);
+    const pendingRecords = records.filter(item => !item.received);
     const received = receivedRecords.reduce((sum, item) => sum + item.amount, 0);
-    const overdue = overdueRecords.reduce((sum, item) => sum + item.amount, 0);
-    const receivedLate = overdueRecords.filter(item => item.received).length;
-    const status = receivedLate ? `Recebido com atraso em ${formatShortDate(overdueRecords.find(item => item.received)?.receivedDate || overdueRecords.find(item => item.received)?.date)}`
-      : overdue ? `Atrasado: ${formatMoney(overdue)}`
-      : received ? `Pago em ${formatShortDate(receivedRecords[0]?.receivedDate || receivedRecords[0]?.date)}`
+    const pending = pendingRecords.reduce((sum, item) => sum + item.amount, 0);
+    const overdue = overdueRecords
+      .filter(item => !item.received)
+      .reduce((sum, item) => sum + item.amount, 0);
+    const receivedLate = overdueRecords.find(item => item.received);
+    const status = received && pending ? `Recebido: ${formatMoney(received)} · pendente: ${formatMoney(pending)}`
+      : overdue ? `Complemento atrasado: ${formatMoney(overdue)}`
+      : receivedLate ? `Semana completa · complemento em ${formatShortDate(receivedLate.receivedDate || receivedLate.date)}`
+      : received ? `Semana completa · paga em ${formatShortDate(receivedRecords[0]?.receivedDate || receivedRecords[0]?.date)}`
+      : pending ? `Previsto: ${formatMoney(pending)}`
       : "Não informado";
-    weeks.push({ week, received, status, overdue: Boolean(overdue && !receivedLate), item: records.find(record => !record.overdue) || records[0] });
+    const expected = regularRecords.reduce((sum, item) => sum + item.amount, 0);
+    weeks.push({ week, received, expected, status, overdue: Boolean(overdue), item: records.find(record => !record.overdue) || records[0] });
   }
 
   const total = weeks.reduce((sum, item) => sum + item.received, 0);
@@ -115,16 +138,19 @@ function renderWeeklyOverview(transactions) {
   container.innerHTML = weeks.map(item => `
     <button class="weekly-overview-card${item.overdue ? " overdue" : ""}" type="button" data-edit-week="${item.week}"${item.item ? "" : ""} aria-label="Editar ${item.week}ª semana">
       <span>${item.week}ª semana</span>
-      <strong>${formatMoney(item.received)}</strong>
+      <strong>${formatMoney(item.received || item.expected)}</strong>
       <small>${escapeHtml(item.status)}</small>
     </button>
   `).join("");
 }
 
-function renderCategories(transactions) {
+function renderCategories(transactions, personalExpenses) {
   const totals = {};
   transactions.filter(item => item.type === "expense").forEach(item => {
     totals[item.category] = (totals[item.category] || 0) + item.amount;
+  });
+  personalExpenses.forEach(item => {
+    totals[item.category] = (totals[item.category] || 0) + (Number(item.amount) || 0);
   });
   const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
   const total = entries.reduce((sum, [, amount]) => sum + amount, 0);
@@ -179,11 +205,49 @@ function formatShortDate(value) {
   );
 }
 
+function renderWeeklyPaymentFields() {
+  const weekdays = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"];
+  const dayOptions = weekdays.map(day => `<option>${day}</option>`).join("");
+  document.getElementById("weekly-payments").innerHTML = Array.from({ length: 4 }, (_, index) => {
+    const week = index + 1;
+    return `
+      <section class="weekly-payment">
+        <div class="weekly-payment-heading">
+          <div><strong>${week}ª semana</strong><small>Valor previsto e data do pagamento</small></div>
+          <label class="check-option" for="week-received-${week}">
+            <input id="week-received-${week}" name="weekReceived${week}" type="checkbox">
+            <span><strong>Recebi</strong></span>
+          </label>
+        </div>
+        <div class="weekly-fields">
+          <label>Dia<select name="weekDay${week}">${dayOptions}</select></label>
+          <label>Data<input name="weekDate${week}" type="date"></label>
+          <label>Valor (R$)<input name="weekAmount${week}" type="number" min="0" step="0.01"></label>
+        </div>
+        <div class="late-payment">
+          <label class="check-option late-payment-toggle" for="week-overdue-${week}">
+            <input id="week-overdue-${week}" name="weekOverdue${week}" type="checkbox">
+            <span><strong>Adicionar complemento por atraso</strong><small>Este valor continua vinculado à ${week}ª semana</small></span>
+          </label>
+          <div class="overdue-fields" id="overdue-fields-${week}" hidden>
+            <label>Dia<select name="weekOverdueDay${week}">${dayOptions}</select></label>
+            <label>Data<input name="weekOverdueDate${week}" type="date"></label>
+            <label>Valor (R$)<input name="weekOverdueAmount${week}" type="number" min="0" step="0.01"></label>
+            <label class="check-option overdue-received" for="week-overdue-received-${week}">
+              <input id="week-overdue-received-${week}" name="weekOverdueReceived${week}" type="checkbox">
+              <span><strong>Já recebi este complemento</strong></span>
+            </label>
+          </div>
+        </div>
+      </section>`;
+  }).join("");
+}
+
+renderWeeklyPaymentFields();
+
 function syncWeeklyPayment(week) {
   const overdue = document.querySelector(`[name="weekOverdue${week}"]`);
   document.getElementById(`overdue-fields-${week}`).hidden = !overdue.checked;
-  document.querySelector(`[name="weekOverdueAmount${week}"]`).required = false;
-  document.querySelector(`[name="weekOverdueDate${week}"]`).required = false;
 }
 
 for (let week = 1; week <= 4; week++) {
@@ -399,6 +463,7 @@ expenseForm.addEventListener("submit", event => {
   state.personalExpenses[activeExpenseCategory] ||= [];
   state.personalExpenses[activeExpenseCategory].push({ name, date, amount });
   saveState();
+  render();
   expenseForm.reset();
   document.getElementById("expense-date").value = new Date().toISOString().slice(0, 10);
   renderExpenseRegisters();
@@ -409,6 +474,7 @@ document.getElementById("expense-register-list").addEventListener("click", event
   if (!button) return;
   state.personalExpenses[activeExpenseCategory].splice(Number(button.dataset.removeExpense), 1);
   saveState();
+  render();
   renderExpenseRegisters();
 });
 
@@ -458,6 +524,42 @@ function syncIncomeStatus() {
 
 document.querySelector('[name="category"]').addEventListener("change", syncIncomeStatus);
 
+function getWeeklySalaryRecords(item, week) {
+  return state.transactions.filter(transaction =>
+    transaction.category === "Salário"
+    && transaction.week === week
+    && (item.salaryGroup
+      ? transaction.salaryGroup === item.salaryGroup
+      : transaction.date.slice(0, 7) === item.date.slice(0, 7))
+  );
+}
+
+function populateWeeklySalaryForm(item, week) {
+  const form = document.getElementById("transaction-form");
+  const records = item ? getWeeklySalaryRecords(item, week) : [];
+  const regular = records.find(record => !record.overdue);
+  const late = records.find(record => record.overdue);
+
+  form.reset();
+  form.elements.description.value = item
+    ? item.description.replace(/ - \dª semana(?: atrasada| \(complemento\))?$/, "")
+    : "Salário";
+  form.elements.category.value = "Salário";
+  form.elements.date.value = item?.date || `${currentMonth()}-${String(new Date().getDate()).padStart(2, "0")}`;
+
+  document.querySelector(`[name="weekReceived${week}"]`).checked = Boolean(regular?.received);
+  document.querySelector(`[name="weekDay${week}"]`).value = regular?.weekDay || "Segunda-feira";
+  document.querySelector(`[name="weekDate${week}"]`).value = regular?.date || item?.date || "";
+  document.querySelector(`[name="weekAmount${week}"]`).value = regular?.amount || "";
+
+  document.querySelector(`[name="weekOverdue${week}"]`).checked = Boolean(late);
+  document.querySelector(`[name="weekOverdueDay${week}"]`).value = late?.weekDay || "Segunda-feira";
+  document.querySelector(`[name="weekOverdueDate${week}"]`).value = late?.date || "";
+  document.querySelector(`[name="weekOverdueAmount${week}"]`).value = late?.amount || "";
+  document.querySelector(`[name="weekOverdueReceived${week}"]`).checked = Boolean(late?.received);
+  syncWeeklyPayment(week);
+}
+
 document.getElementById("transaction-form").addEventListener("submit", event => {
   const submitter = event.submitter;
   if (!submitter || submitter.value === "cancel") return;
@@ -465,62 +567,62 @@ document.getElementById("transaction-form").addEventListener("submit", event => 
   const form = event.currentTarget;
   const data = new FormData(form);
   const isWeeklySalary = selectedType === "income" && data.get("category") === "Salário";
-  if (editingTransactionId && isWeeklySalary) {
-    const index = state.transactions.findIndex(item => item.id === editingTransactionId);
-    if (index >= 0) {
-      const current = state.transactions[index];
-      const week = current.week || 1;
-      const amount = Number(data.get(`weekAmount${week}`));
-      if (amount > 0) {
-        state.transactions[index] = {
-          ...current,
-          description: data.get("description").trim(),
-          amount,
-          date: data.get(`weekDate${week}`) || data.get("date"),
-          received: data.get(`weekReceived${week}`) === "on",
-          receivedDate: data.get(`weekReceived${week}`) === "on" ? data.get(`weekDate${week}`) : "",
-          overdue: data.get(`weekOverdue${week}`) === "on",
-          weekDay: data.get(`weekDay${week}`)
-        };
-        saveState();
-        document.getElementById("transaction-modal").close();
-        render();
-        return;
-      }
-    }
-  }
   if (isWeeklySalary) {
-    const groupId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
-    for (let week = 1; week <= 4; week++) {
+    const current = state.transactions.find(item => item.id === editingTransactionId);
+    const groupId = current?.salaryGroup || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()));
+    const weeks = current ? [current.week || 1] : [1, 2, 3, 4];
+
+    for (const week of weeks) {
+      const previousRecords = current
+        ? state.transactions.filter(item => item.category === "Salário"
+          && item.week === week
+          && (current.salaryGroup
+            ? item.salaryGroup === current.salaryGroup
+            : item.date.slice(0, 7) === current.date.slice(0, 7)))
+        : [];
+      const regular = previousRecords.find(item => !item.overdue);
+      const late = previousRecords.find(item => item.overdue);
       const amount = Number(data.get(`weekAmount${week}`));
-      if (amount <= 0) continue;
-      state.transactions.push({
-        id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${week}`,
-        type: "income",
-        description: `${data.get("description")} - ${week}ª semana`,
-        amount,
-        date: data.get(`weekDate${week}`) || data.get("date"),
-        category: "Salário",
-        method: "account",
-        received: data.get(`weekReceived${week}`) === "on",
-        receivedDate: (data.get(`weekReceived${week}`) === "on" || data.get(`weekOverdue${week}`) === "on") ? data.get(`weekDate${week}`) : "",
-        overdue: data.get(`weekOverdue${week}`) === "on",
-        week,
-        weekDay: data.get(`weekDay${week}`),
-        salaryGroup: groupId
-      });
-      const overdueAmount = Number(data.get(`weekOverdueAmount${week}`));
-      if (data.get(`weekOverdue${week}`) === "on" && overdueAmount > 0) {
+      const lateAmount = Number(data.get(`weekOverdueAmount${week}`));
+      const weekDate = data.get(`weekDate${week}`) || data.get("date");
+      const lateDate = data.get(`weekOverdueDate${week}`) || data.get("date");
+      const received = data.get(`weekReceived${week}`) === "on";
+      const lateReceived = data.get(`weekOverdueReceived${week}`) === "on";
+      const description = data.get("description").trim();
+
+      state.transactions = state.transactions.filter(item =>
+        !previousRecords.some(previous => previous.id === item.id)
+      );
+
+      if (amount > 0) {
         state.transactions.push({
-          id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${week}-overdue`,
+          id: regular?.id || (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${week}`),
           type: "income",
-          description: `${data.get("description")} - ${week}ª semana atrasada`,
-          amount: overdueAmount,
-          date: data.get(`weekOverdueDate${week}`) || data.get("date"),
+          description: `${description} - ${week}ª semana`,
+          amount,
+          date: weekDate,
           category: "Salário",
           method: "account",
-          received: true,
-          receivedDate: data.get(`weekOverdueDate${week}`) || data.get("date"),
+          received,
+          receivedDate: received ? weekDate : "",
+          overdue: false,
+          week,
+          weekDay: data.get(`weekDay${week}`),
+          salaryGroup: groupId
+        });
+      }
+
+      if (data.get(`weekOverdue${week}`) === "on" && lateAmount > 0) {
+        state.transactions.push({
+          id: late?.id || (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${week}-late`),
+          type: "income",
+          description: `${description} - ${week}ª semana (complemento)`,
+          amount: lateAmount,
+          date: lateDate,
+          category: "Salário",
+          method: "account",
+          received: lateReceived,
+          receivedDate: lateReceived ? lateDate : "",
           overdue: true,
           week,
           weekDay: data.get(`weekOverdueDay${week}`),
@@ -562,35 +664,17 @@ document.addEventListener("click", event => {
   const weekButton = event.target.closest("[data-edit-week]");
   if (weekButton) {
     const week = Number(weekButton.dataset.editWeek);
-    const item = state.transactions.find(transaction =>
-      transaction.category === "Salário" && transaction.week === week && !transaction.overdue
-    ) || state.transactions.find(transaction =>
+    const records = monthTransactions().filter(transaction =>
       transaction.category === "Salário" && transaction.week === week
     );
+    const item = records.find(transaction => !transaction.overdue) || records[0];
+    editingTransactionId = item?.id || null;
+    selectedType = "income";
+    populateWeeklySalaryForm(item, week);
     if (!item) {
-      editingTransactionId = null;
-      selectedType = "income";
-      const form = document.getElementById("transaction-form");
-      form.elements.description.value = "Salário";
-      form.elements.category.value = "Salário";
-      form.elements.date.value = `${currentMonth()}-${String(new Date().getDate()).padStart(2, "0")}`;
-      document.querySelector(`[name="weekReceived${week}"]`).checked = false;
-      document.querySelector(`[name="weekOverdue${week}"]`).checked = false;
-    } else {
-      editingTransactionId = item.id;
-      selectedType = "income";
-      const form = document.getElementById("transaction-form");
-      form.elements.description.value = item.description.replace(/ - \dª semana$/, "");
-      form.elements.date.value = item.date;
-      form.elements.category.value = "Salário";
-      document.querySelector(`[name="weekReceived${week}"]`).checked = Boolean(item.received);
-      document.querySelector(`[name="weekOverdue${week}"]`).checked = Boolean(item.overdue);
-      document.querySelector(`[name="weekDay${week}"]`).value = item.weekDay || "Segunda-feira";
-      document.querySelector(`[name="weekDate${week}"]`).value = item.date;
-      document.querySelector(`[name="weekAmount${week}"]`).value = item.amount;
+      document.querySelector(`[name="weekDate${week}"]`).value = `${currentMonth()}-${String(new Date().getDate()).padStart(2, "0")}`;
     }
     syncIncomeStatus();
-    syncWeeklyPayment(week);
     document.querySelectorAll(".type-switch button").forEach(button => button.classList.toggle("active", button.dataset.type === selectedType));
     document.querySelector("#transaction-modal .eyebrow").textContent = "Alterar salário semanal";
     document.querySelector("#transaction-modal h2").textContent = `${week}ª semana do salário`;
@@ -605,19 +689,22 @@ document.addEventListener("click", event => {
   editingTransactionId = item.id;
   selectedType = item.type;
   const form = document.getElementById("transaction-form");
+  if (item.category === "Salário" && item.week) {
+    populateWeeklySalaryForm(item, item.week);
+    syncIncomeStatus();
+    document.querySelectorAll(".type-switch button").forEach(button => button.classList.toggle("active", button.dataset.type === selectedType));
+    document.querySelector("#transaction-modal .eyebrow").textContent = "Alterar salário semanal";
+    document.querySelector("#transaction-modal h2").textContent = `${item.week}ª semana do salário`;
+    document.getElementById("transaction-submit").textContent = "Salvar alterações";
+    document.getElementById("transaction-modal").showModal();
+    return;
+  }
+  form.reset();
   form.elements.description.value = item.description;
   form.elements.amount.value = item.amount;
   form.elements.date.value = item.date;
   form.elements.category.value = item.category;
   form.elements.method.value = item.method;
-  if (item.category === "Salário" && item.week) {
-    document.querySelector(`[name="weekReceived${item.week}"]`).checked = Boolean(item.received);
-    document.querySelector(`[name="weekOverdue${item.week}"]`).checked = Boolean(item.overdue);
-    document.querySelector(`[name="weekDay${item.week}"]`).value = item.weekDay || "Segunda-feira";
-    document.querySelector(`[name="weekDate${item.week}"]`).value = item.date;
-    document.querySelector(`[name="weekAmount${item.week}"]`).value = item.amount;
-    syncWeeklyPayment(item.week);
-  }
   syncIncomeStatus();
   document.querySelectorAll(".type-switch button").forEach(button => button.classList.toggle("active", button.dataset.type === selectedType));
   document.querySelector("#transaction-modal .eyebrow").textContent = "Alterar lançamento";

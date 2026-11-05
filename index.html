@@ -59,18 +59,18 @@
         <div class="summary-grid">
           <article class="summary-card balance">
             <div class="summary-top">
-              <span>Saldo disponível</span>
+              <span>Valor líquido</span>
               <span class="summary-icon" aria-label="Dinheiro">💵</span>
             </div>
             <strong class="summary-value" id="available-balance">R$ 0,00</strong>
-            <p id="balance-caption">Após as movimentações do mês</p>
+            <p id="balance-caption">Entradas recebidas menos gastos do mês</p>
           </article>
           <article class="summary-card">
             <div class="summary-top">
               <span>Entradas</span>
               <span class="trend positive">↑</span>
             </div>
-            <strong class="summary-value" id="income-total">R$ 0,00</strong>
+            <strong class="summary-value income" id="income-total">R$ 0,00</strong>
             <p>Salário e outras receitas</p>
           </article>
           <article class="summary-card">
@@ -78,7 +78,7 @@
               <span>Gastos</span>
               <span class="trend negative">↓</span>
             </div>
-            <strong class="summary-value" id="expense-total">R$ 0,00</strong>
+            <strong class="summary-value expense" id="expense-total">R$ 0,00</strong>
             <p id="expense-caption">Total do mês</p>
           </article>
           <article class="summary-card">
@@ -287,7 +287,7 @@
     </div>
   </dialog>
 
-  <dialog class="modal" id="transaction-modal">
+  <dialog class="modal transaction-modal" id="transaction-modal">
     <form method="dialog" id="transaction-form">
       <div class="modal-heading">
         <div>
@@ -324,90 +324,9 @@
       <div class="income-status" id="income-status" hidden>
         <div class="weekly-title">
           <strong>Pagamentos do mês</strong>
-          <small>Cadastre os valores semanais e marque os que já recebeu</small>
+          <small>Registre cada semana e marque os valores que já recebeu</small>
         </div>
-        <div class="weekly-payments">
-          <div class="weekly-payment">
-            <label class="check-option" for="week-received-1">
-              <input id="week-received-1" name="weekReceived1" type="checkbox">
-              <span><strong>1ª semana</strong></span>
-            </label>
-            <label class="check-option overdue-option" for="week-overdue-1">
-              <input id="week-overdue-1" name="weekOverdue1" type="checkbox">
-              <span><strong>Atrasado</strong></span>
-            </label>
-            <div class="weekly-fields" id="week-fields-1">
-              <label>Dia<select name="weekDay1"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
-              <label>Data<input name="weekDate1" type="date"></label>
-              <label>Valor<input name="weekAmount1" type="number" min="0" step="0.01"></label>
-            </div>
-            <div class="overdue-fields" id="overdue-fields-1" hidden>
-              <label>Dia atrasado<select name="weekOverdueDay1"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
-              <label>Data atrasada<input name="weekOverdueDate1" type="date"></label>
-              <label>Valor atrasado<input name="weekOverdueAmount1" type="number" min="0" step="0.01"></label>
-            </div>
-          </div>
-          <div class="weekly-payment">
-            <label class="check-option" for="week-received-2">
-              <input id="week-received-2" name="weekReceived2" type="checkbox">
-              <span><strong>2ª semana</strong></span>
-            </label>
-            <label class="check-option overdue-option" for="week-overdue-2">
-              <input id="week-overdue-2" name="weekOverdue2" type="checkbox">
-              <span><strong>Atrasado</strong></span>
-            </label>
-            <div class="weekly-fields" id="week-fields-2">
-              <label>Dia<select name="weekDay2"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
-              <label>Data<input name="weekDate2" type="date"></label>
-              <label>Valor<input name="weekAmount2" type="number" min="0" step="0.01"></label>
-            </div>
-            <div class="overdue-fields" id="overdue-fields-2" hidden>
-              <label>Dia atrasado<select name="weekOverdueDay2"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
-              <label>Data atrasada<input name="weekOverdueDate2" type="date"></label>
-              <label>Valor atrasado<input name="weekOverdueAmount2" type="number" min="0" step="0.01"></label>
-            </div>
-          </div>
-          <div class="weekly-payment">
-            <label class="check-option" for="week-received-3">
-              <input id="week-received-3" name="weekReceived3" type="checkbox">
-              <span><strong>3ª semana</strong></span>
-            </label>
-            <label class="check-option overdue-option" for="week-overdue-3">
-              <input id="week-overdue-3" name="weekOverdue3" type="checkbox">
-              <span><strong>Atrasado</strong></span>
-            </label>
-            <div class="weekly-fields" id="week-fields-3">
-              <label>Dia<select name="weekDay3"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
-              <label>Data<input name="weekDate3" type="date"></label>
-              <label>Valor<input name="weekAmount3" type="number" min="0" step="0.01"></label>
-            </div>
-            <div class="overdue-fields" id="overdue-fields-3" hidden>
-              <label>Dia atrasado<select name="weekOverdueDay3"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
-              <label>Data atrasada<input name="weekOverdueDate3" type="date"></label>
-              <label>Valor atrasado<input name="weekOverdueAmount3" type="number" min="0" step="0.01"></label>
-            </div>
-          </div>
-          <div class="weekly-payment">
-            <label class="check-option" for="week-received-4">
-              <input id="week-received-4" name="weekReceived4" type="checkbox">
-              <span><strong>4ª semana</strong></span>
-            </label>
-            <label class="check-option overdue-option" for="week-overdue-4">
-              <input id="week-overdue-4" name="weekOverdue4" type="checkbox">
-              <span><strong>Atrasado</strong></span>
-            </label>
-            <div class="weekly-fields" id="week-fields-4">
-              <label>Dia<select name="weekDay4"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
-              <label>Data<input name="weekDate4" type="date"></label>
-              <label>Valor<input name="weekAmount4" type="number" min="0" step="0.01"></label>
-            </div>
-            <div class="overdue-fields" id="overdue-fields-4" hidden>
-              <label>Dia atrasado<select name="weekOverdueDay4"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select></label>
-              <label>Data atrasada<input name="weekOverdueDate4" type="date"></label>
-              <label>Valor atrasado<input name="weekOverdueAmount4" type="number" min="0" step="0.01"></label>
-            </div>
-          </div>
-        </div>
+        <div class="weekly-payments" id="weekly-payments"></div>
       </div>
       <button class="button primary modal-submit" type="submit" id="transaction-submit">Adicionar movimentação</button>
     </form>
