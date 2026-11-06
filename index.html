@@ -7,9 +7,32 @@
   <title>Meu Dinheiro - Controle Financeiro</title>
   <meta name="description" content="Organizador financeiro pessoal para salário, gastos e fatura do cartão.">
   <link rel="stylesheet" href="styles.css">
+  <script src="supabase-config.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="script.js" defer></script>
 </head>
 <body>
+  <section class="auth-screen" id="auth-screen" hidden>
+    <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <button class="close-button auth-close" id="auth-close" type="button" aria-label="Fechar login">×</button>
+      <a class="logo auth-logo" href="index.html" aria-label="Meu Dinheiro">
+        <span class="logo-mark">M</span>
+        <span>Meu Dinheiro</span>
+      </a>
+      <p class="eyebrow">Seus dados em todos os dispositivos</p>
+      <h1 id="auth-title">Entrar na sua conta</h1>
+      <p class="auth-description" id="auth-description">Entre para acessar seus dados financeiros sincronizados.</p>
+      <form id="auth-form">
+        <label>E-mail<input id="auth-email" type="email" autocomplete="email" required></label>
+        <label>Senha<input id="auth-password" type="password" autocomplete="current-password" minlength="8" required></label>
+        <button class="button primary auth-submit" id="auth-submit" type="submit">Entrar</button>
+      </form>
+      <p class="auth-message" id="auth-message" role="status" aria-live="polite"></p>
+      <button class="text-button auth-toggle" id="auth-toggle" type="button">Ainda não tem conta? Criar conta</button>
+      <button class="button auth-offline" id="auth-offline" type="button">Continuar sem conta neste dispositivo</button>
+    </div>
+  </section>
+
   <aside class="sidebar">
     <a class="logo" href="index.html" aria-label="Meu Dinheiro">
       <span class="logo-mark">M</span>
@@ -34,7 +57,10 @@
     </nav>
     <div class="private-note">
       <span>●</span>
-      Dados privados neste dispositivo
+      <span id="sync-status" role="status">Dados apenas neste dispositivo</span>
+      <span class="account-email" id="account-email" hidden></span>
+      <button class="text-button" id="sync-now-button" type="button" hidden>Sincronizar agora</button>
+      <button class="text-button" id="sign-out-button" type="button" hidden>Sair</button>
     </div>
   </aside>
 
@@ -50,6 +76,7 @@
           <span>Mês</span>
           <select id="month-select"></select>
         </label>
+        <button class="button account-action" id="auth-open-button" type="button">Entrar na conta</button>
         <button class="button primary" id="add-button" type="button">+ Nova movimentação</button>
       </div>
     </header>

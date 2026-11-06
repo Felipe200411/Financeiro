@@ -64,7 +64,30 @@ button, a, input, select, .panel, .summary-card, .transaction-item,
   color: var(--muted); font-size: 11px; line-height: 1.4;
 }
 .private-note span { color: var(--green); margin-right: 5px; }
-
+.private-note #sync-status { color: var(--muted); }
+.private-note #sync-status.sync-error { color: var(--red); }
+.account-email { display: block; max-width: 100%; margin-top: 8px; overflow: hidden; text-overflow: ellipsis; }
+.account-email[hidden], #sync-now-button[hidden], #sign-out-button[hidden] { display: none; }
+.auth-screen {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+  padding: 20px; background: radial-gradient(ellipse at top, #14221f, var(--bg) 60%);
+}
+.auth-screen[hidden] { display: none; }
+.auth-card {
+  position: relative; width: min(430px, 100%); padding: 32px; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--panel); box-shadow: 0 24px 70px rgba(0,0,0,.38);
+}
+.auth-close { position: absolute; top: 16px; right: 16px; }
+.auth-logo { margin-bottom: 34px; padding: 0; }
+.auth-card h1 { margin: 8px 0; font-size: 25px; }
+.auth-description { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.auth-card label { display: grid; gap: 7px; margin-top: 18px; color: var(--muted); font-size: 12px; }
+.auth-card input { width: 100%; height: 44px; }
+.auth-submit { width: 100%; margin-top: 22px; }
+.auth-offline { width: 100%; margin-top: 12px; }
+.auth-message { min-height: 18px; margin: 14px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.auth-message.error { color: var(--red); }
+.auth-toggle { margin-top: 12px; }
 main { grid-column: 2; min-width: 0; }
 .topbar {
   height: 92px; display: flex; align-items: center; gap: 18px; padding: 0 32px;
@@ -402,8 +425,10 @@ select:focus, input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rg
 @media (max-width: 650px) {
   .topbar { height: auto; min-height: 82px; padding: 14px 16px; flex-wrap: wrap; }
   .topbar > div:first-of-type { flex: 1; }
-  .top-actions { width: 100%; justify-content: space-between; }
-  .top-actions .button { flex: 1; }
+  .top-actions { display: grid; width: 100%; grid-template-columns: 1fr 1.4fr; gap: 8px; }
+  .month-picker { grid-column: 1 / -1; justify-content: space-between; }
+  .month-picker select { flex: 1; }
+  .top-actions .button { min-width: 0; padding: 0 8px; font-size: 12px; }
   .content { padding: 18px 16px 35px; }
   .summary-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
   .summary-card { min-height: 130px; padding: 16px; }

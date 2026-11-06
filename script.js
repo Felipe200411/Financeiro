@@ -2,6 +2,14 @@
 
 const STORAGE_KEY = "meu-dinheiro-data-v1";
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+let activeStorageKey = STORAGE_KEY;
+let supabaseClient = null;
+let currentUser = null;
+let cloudReady = false;
+let cloudSaveTimer = null;
+let activeUserId = null;
+let loadingUserId = null;
+let sessionVersion = 0;
 const categoryIcons = {
   Alimentação: "🍴", Moradia: "⌂", Transporte: "↗", Saúde: "＋",
   Lazer: "♫", Compras: "◇", Educação: "▤", Salário: "R$", Outros: "•"
@@ -16,10 +24,10 @@ let editingTransactionId = null;
 const monthSelect = document.getElementById("month-select");
 const monthOptions = buildMonthOptions();
 
-function loadState() {
+function loadState(key = STORAGE_KEY) {
   const fallback = { cardLimit: 280, cardUsed: 0, transactions: [] };
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    const saved = JSON.parse(localStorage.getItem(key) || "{}");
     const loaded = { ...fallback, ...saved };
     loaded.transactions = (loaded.transactions || []).map(item => {
       if (item.type !== "income" || item.category !== "Salário" || !item.week) return item;
@@ -38,7 +46,279 @@ function loadState() {
 }
 
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(activeStorageKey, JSON.stringify(state));
+  if (cloudReady && currentUser) {
+    clearTimeout(cloudSaveTimer);
+    setSyncStatus("Salvando na nuvem...");
+    cloudSaveTimer = setTimeout(() => {
+      void saveCloudState();
+    }, 700);
+  }
+}
+
+function setSyncStatus(message, isError = false) {
+  const status = document.getElementById("sync-status");
+  status.textContent = message;
+  status.classList.toggle("sync-error", isError);
+}
+
+async function saveCloudState() {
+  if (!cloudReady || !currentUser || !supabaseClient) return;
+  try {
+    const { error } = await supabaseClient
+      .from("financeiro_data")
+      .upsert({
+        user_id: currentUser.id,
+        data: state,
+        updated_at: new Date().toISOString()
+      }, { onConflict: "user_id" });
+    if (error) throw error;
+    setSyncStatus("Sincronizado na nuvem");
+  } catch (error) {
+    setSyncStatus(`Erro ao sincronizar: ${error.message}`, true);
+  }
+}
+
+function hasSavedData(savedState) {
+  return savedState.transactions.length > 0
+    || Object.values(savedState.personalExpenses || {}).some(items => items.length > 0)
+    || savedState.cardUsageConfirmed
+    || Number(savedState.cardLimit) !== 280;
+}
+
+async function activateUser(user) {
+  if (!user || loadingUserId === user.id || (activeUserId === user.id && cloudReady)) return;
+  const version = ++sessionVersion;
+  loadingUserId = user.id;
+  activeUserId = user.id;
+  currentUser = user;
+  cloudReady = false;
+  clearTimeout(cloudSaveTimer);
+
+  const legacyState = state;
+  const accountStorageKey = `${STORAGE_KEY}:${user.id}`;
+  const hasAccountData = localStorage.getItem(accountStorageKey) !== null;
+  activeStorageKey = accountStorageKey;
+  state = loadState(accountStorageKey);
+  document.getElementById("account-email").textContent = user.email || "Conta conectada";
+  document.getElementById("account-email").hidden = false;
+  document.getElementById("sync-now-button").hidden = false;
+  document.getElementById("sign-out-button").hidden = false;
+  const authOpenButton = document.getElementById("auth-open-button");
+  authOpenButton.textContent = "Conta conectada";
+  authOpenButton.title = user.email || "";
+  setSyncStatus("Carregando seus dados...");
+
+  try {
+    const { data: record, error } = await supabaseClient
+      .from("financeiro_data")
+      .select("data")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (error) throw error;
+    if (version !== sessionVersion) return;
+
+    if (record) {
+      state = record.data;
+    } else if (!hasAccountData && hasSavedData(legacyState)) {
+      const importLegacy = window.confirm(
+        "Encontramos dados salvos neste navegador. Deseja importá-los para esta conta e sincronizá-los?"
+      );
+      if (importLegacy) state = legacyState;
+    }
+
+    state.personalExpenses ||= {};
+    cloudReady = true;
+    saveState();
+    render();
+  } catch (error) {
+    if (version === sessionVersion) {
+      setSyncStatus(`Não foi possível carregar/sincronizar: ${error.message}`, true);
+    }
+  } finally {
+    if (loadingUserId === user.id) loadingUserId = null;
+  }
+}
+
+function initializeAuthentication() {
+  const authScreen = document.getElementById("auth-screen");
+  const authForm = document.getElementById("auth-form");
+  const authMessage = document.getElementById("auth-message");
+  const authToggle = document.getElementById("auth-toggle");
+  const authOffline = document.getElementById("auth-offline");
+  const authClose = document.getElementById("auth-close");
+  const authOpenButton = document.getElementById("auth-open-button");
+  const authTitle = document.getElementById("auth-title");
+  const authDescription = document.getElementById("auth-description");
+  const authSubmit = document.getElementById("auth-submit");
+  let isSignUp = false;
+  let authConfigured = false;
+  let authUnavailableMessage = "O login ainda não está configurado neste site. Você pode continuar sem conta; configure o Supabase para ativar cadastro e sincronização.";
+
+  function showMessage(message, isError = false) {
+    authMessage.textContent = message;
+    authMessage.classList.toggle("error", isError);
+  }
+
+  function setAuthMode(signUp) {
+    isSignUp = signUp;
+    authTitle.textContent = signUp ? "Criar sua conta" : "Entrar na sua conta";
+    authDescription.textContent = signUp
+      ? "Crie uma conta para acessar seus dados financeiros em qualquer dispositivo."
+      : "Entre para acessar seus dados financeiros sincronizados.";
+    authSubmit.textContent = signUp ? "Criar conta" : "Entrar";
+    authToggle.textContent = signUp ? "Já tem conta? Entrar" : "Ainda não tem conta? Criar conta";
+    document.getElementById("auth-password").autocomplete = signUp ? "new-password" : "current-password";
+    showMessage("");
+  }
+
+  authToggle.addEventListener("click", () => setAuthMode(!isSignUp));
+
+  function closeAuthScreen() {
+    authScreen.hidden = true;
+  }
+
+  authOpenButton.addEventListener("click", () => {
+    if (currentUser) {
+      if (cloudReady) {
+        clearTimeout(cloudSaveTimer);
+        void saveCloudState();
+      } else {
+        void activateUser(currentUser);
+      }
+      return;
+    }
+    authScreen.hidden = false;
+    if (authConfigured) {
+      setAuthMode(false);
+    } else {
+      showMessage(authUnavailableMessage, true);
+    }
+  });
+  authOffline.addEventListener("click", closeAuthScreen);
+  authClose.addEventListener("click", closeAuthScreen);
+  authScreen.addEventListener("click", event => {
+    if (event.target === authScreen) closeAuthScreen();
+  });
+
+  const config = window.FINANCEIRO_SUPABASE;
+  const hasPartialConfiguration = Boolean(config?.url || config?.anonKey);
+  if (!hasPartialConfiguration) {
+    authSubmit.disabled = true;
+    authToggle.hidden = true;
+    showMessage("O login ainda não está configurado neste site. Configure o Supabase para ativar cadastro e sincronização.", true);
+    setSyncStatus("Dados apenas neste dispositivo");
+    return;
+  }
+
+  if (!config.url || !config.anonKey) {
+    authUnavailableMessage = "A configuração do Supabase está incompleta. Você pode continuar sem conta.";
+    authSubmit.disabled = true;
+    authToggle.hidden = true;
+    showMessage(
+      "Para ativar o login, falta preencher a URL do projeto Supabase em supabase-config.js. Não compartilhe senhas ou chaves privadas.",
+      true
+    );
+    setSyncStatus("Configuração do login incompleta", true);
+    return;
+  }
+
+  if (!window.supabase?.createClient) {
+    authUnavailableMessage = "O serviço de autenticação não carregou. Verifique sua conexão e atualize a página.";
+    authSubmit.disabled = true;
+    authToggle.hidden = true;
+    showMessage("O serviço de autenticação não carregou. Verifique sua conexão e atualize a página.", true);
+    return;
+  }
+  authConfigured = true;
+  supabaseClient = window.supabase.createClient(config.url, config.anonKey);
+
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    window.setTimeout(() => {
+      if (session?.user) {
+        closeAuthScreen();
+        void activateUser(session.user);
+      } else if (_event === "SIGNED_OUT") {
+        sessionVersion++;
+        currentUser = null;
+        activeUserId = null;
+        loadingUserId = null;
+        cloudReady = false;
+        clearTimeout(cloudSaveTimer);
+        activeStorageKey = STORAGE_KEY;
+        state = loadState();
+        state.personalExpenses ||= {};
+        render();
+        document.getElementById("account-email").hidden = true;
+        document.getElementById("sync-now-button").hidden = true;
+        document.getElementById("sign-out-button").hidden = true;
+        authOpenButton.textContent = "Entrar na conta";
+        authOpenButton.title = "";
+        setSyncStatus("Dados apenas neste dispositivo");
+      }
+    }, 0);
+  });
+
+  void supabaseClient.auth.getSession().then(({ data, error }) => {
+    if (error) throw error;
+    if (data.session?.user) {
+      closeAuthScreen();
+      void activateUser(data.session.user);
+    }
+  }).catch(error => showMessage(`Não foi possível verificar a sessão: ${error.message}`, true));
+
+  authForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    authSubmit.disabled = true;
+    showMessage(isSignUp ? "Criando sua conta..." : "Entrando...");
+    const email = document.getElementById("auth-email").value.trim();
+    const password = document.getElementById("auth-password").value;
+    try {
+      const redirectUrl = ["http:", "https:"].includes(window.location.protocol)
+        ? window.location.href.split("#")[0]
+        : undefined;
+      const result = isSignUp
+        ? await supabaseClient.auth.signUp({
+          email,
+          password,
+          ...(redirectUrl ? { options: { emailRedirectTo: redirectUrl } } : {})
+        })
+        : await supabaseClient.auth.signInWithPassword({ email, password });
+
+      if (result.error) {
+        showMessage(result.error.message, true);
+      } else if (isSignUp && !result.data.session) {
+        showMessage("Conta criada. Verifique seu e-mail para confirmar o cadastro e depois entre.");
+      } else if (result.data.session?.user) {
+        showMessage("Login realizado. Carregando seus dados...");
+        closeAuthScreen();
+        void activateUser(result.data.session.user);
+      }
+    } catch (error) {
+      showMessage(`Não foi possível concluir a operação: ${error.message}`, true);
+    } finally {
+      authSubmit.disabled = false;
+    }
+  });
+
+  document.getElementById("sign-out-button").addEventListener("click", async () => {
+    try {
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) showMessage(`Não foi possível sair da conta: ${error.message}`, true);
+    } catch (error) {
+      showMessage(`Não foi possível sair da conta: ${error.message}`, true);
+    }
+  });
+
+  document.getElementById("sync-now-button").addEventListener("click", () => {
+    if (!currentUser) return;
+    if (cloudReady) {
+      clearTimeout(cloudSaveTimer);
+      void saveCloudState();
+    } else {
+      void activateUser(currentUser);
+    }
+  });
 }
 
 function buildMonthOptions() {
@@ -736,3 +1016,4 @@ document.getElementById("card-limit-range").addEventListener("input", event => {
 });
 
 render();
+initializeAuthentication();

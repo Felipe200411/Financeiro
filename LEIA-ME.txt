@@ -3,4 +3,8 @@ MEU DINHEIRO
 Abra index.html no navegador para usar o painel financeiro.
 
 O painel permite cadastrar salário, receitas, despesas mensais, forma de
-pagamento e compras do cartão. Os dados ficam armazenados no navegador.
+pagamento e compras do cartão. O site funciona sem login; use “Entrar na conta”
+na página inicial para abrir o cadastro e sincronizar dados com o Supabase.
+
+Sem configuração, os dados ficam apenas no navegador. Para login e sincronização
+entre dispositivos, siga as instruções de configuração do Supabase no README.md.
