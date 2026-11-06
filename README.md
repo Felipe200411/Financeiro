@@ -9,8 +9,9 @@ O site funciona sem login, salvando os dados somente no navegador e dispositivo
 atuais. Use **Entrar na conta** na página inicial para abrir o cadastro/login e
 sincronizar os dados entre dispositivos com Supabase:
 
-1. Crie um projeto em [supabase.com](https://supabase.com/) e guarde a URL do
-   projeto e a chave pública `anon`/publishable.
+1. Crie um projeto em [supabase.com](https://supabase.com/) e guarde a URL base
+   do projeto (por exemplo, `https://seu-projeto.supabase.co`) e a chave pública
+   `anon`/publishable. Não use a URL de API com `/rest/v1`.
 2. No painel do Supabase, abra **SQL Editor**, cole o conteúdo de
    `supabase-schema.sql` e execute. A tabela usa Row Level Security para cada
    conta acessar somente os próprios dados.

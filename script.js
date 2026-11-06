@@ -231,7 +231,8 @@ function initializeAuthentication() {
     return;
   }
   authConfigured = true;
-  supabaseClient = window.supabase.createClient(config.url, config.anonKey);
+  const projectUrl = config.url.replace(/\/rest\/v1\/?$/i, "").replace(/\/+$/, "");
+  supabaseClient = window.supabase.createClient(projectUrl, config.anonKey);
 
   supabaseClient.auth.onAuthStateChange((_event, session) => {
     window.setTimeout(() => {
